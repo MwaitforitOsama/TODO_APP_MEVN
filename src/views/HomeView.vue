@@ -34,12 +34,12 @@
       </template>
         <v-card>
           <v-row no-gutters>
-            <v-col sm="10" class="mx-auto">
+            <v-col cols="12" class="mx-auto">
               <h2>New Todo</h2>
               <v-divider></v-divider>
               <v-form ref="form" @submit.prevent="submitForm" class="pa-5" enctype="multipart/form-data">
                 <v-text-field label="Title" v-model="post.title" prepend-icon="mdi-note" :rules="rules"></v-text-field>
-                <v-text-field label="Status" v-model="post.status" prepend-icon="mdi-view-list" :rules="rules"></v-text-field>
+                <v-text-field label="Status" v-model="post.status" prepend-icon="mdi-view-list" disabled="disabled" :rules="rules"></v-text-field>
                 <v-text-field label="Content" v-model="post.content" prepend-icon="mdi-note-plus" :rules="rules"></v-text-field>
              
                 <v-btn type="submit" class="mt-3" color="primary"> Add Todo</v-btn>
@@ -52,31 +52,15 @@
           </div>
             
  
-    <v-row no-gutters>
-
-      
-          
-          <v-col v-for = "task in tasks"  :key="task._id" cols="4" sm="10" class="p-2 text-center" >
-          
-            <v-card 
-    outlined color="transparent">
-           
-               
-              
+          <v-row no-gutters class="d-flex justify-center">
+      <v-col v-for="task in tasks" :key="task._id" cols="12" md="10" class="p-2">
+        <v-card outlined color="transparent" class="mx-auto" max-width="800">
+          <v-list-item three-line>
+            <v-checkbox class="pa-6 bg-secondary rounded-circle d-inline-block" v-model="task.status" color="primary"
+              value="1" hide-details  @click="updateTaskStatus(task._id)">
+            </v-checkbox>
                 
-             
-              <v-list-item three-line>
-                <!-- <v-checkbox intermediate  ></v-checkbox> -->
-                <v-switch
-      v-model="people"
-      color="primary"
-      
-      value="1"
-      hide-details
-      :label=task.status
-      @click="updateTaskStatus(task._id)"
-    ></v-switch>
-                <v-list-item-subtitile><span class="title">{{ task.title }}</span><span class="content">{{ task.content }}</span></v-list-item-subtitile>
+                <v-list-item-subtitile><span class="content">{{ task.content }} {{ task.title }}</span></v-list-item-subtitile>
                 
               
               
@@ -101,7 +85,7 @@
               <v-divider></v-divider>
               <v-form ref="form" @submit.prevent="updateForm(task._id, task.title, task.status, task.content)" class="pa-5" enctype="multipart/form-data">
                 <v-text-field label="Title" v-model="task.title" prepend-icon="mdi-note" ></v-text-field>
-                <v-text-field label="Status" v-model="task.status" prepend-icon="mdi-view-list" ></v-text-field>
+                <!-- <v-text-field label="Status" v-model="task.status" prepend-icon="mdi-view-list" ></v-text-field> -->
                 <v-text-field label="Content" v-model="task.content" prepend-icon="mdi-note-plus" ></v-text-field>
            
                 <v-btn type="submit" class="mt-3" color="success"> Update</v-btn>
@@ -146,9 +130,15 @@
 
 <script>
 import API from './api';
+import checkbox from '../components/CheckBox.vue';
 
 export default {
+  components: {
+    checkbox,
+  },
   props: {
+
+
   task: {
     type: Object,
     required: true,
@@ -167,7 +157,7 @@ computed: {
       rules: [(value)=> !!value || "This filed si required!"],
       post: {
         title:"",
-        status:"",
+        status:"uncomplete",
         content:"",
        
       },
@@ -178,17 +168,42 @@ computed: {
   async created(){
     console.log("IM thE ID");
     
-    const response =await API.getTaksbyID(this.$route.params.id);
+    const response =await API.getTaskbyID(this.$route.params.id);
     
     this.post = response;
   },
   methods:{
     async updateTaskStatus(id) {
-      const post = await API.getTaksbyID(id);
-      console.log("UPDATE TAKS: ",post);
-      post.status = this.task.status === "completed" ? "completed" : "uncompleted";
-      await post.save();
-    },
+  const post = await API.getTaskbyID(id);
+  console.log("POST BEFORE UPDATE: ", post);
+
+  // Update the status of the task
+  // post.status = this.post.status === "completed" ? "uncompleted" : "completed";
+  if(post.status == 'completed')
+  {
+    post.status = 'uncompleted';
+    console.log("IM AN IF : " +post.status);
+  }
+  else
+  {
+    post.status= 'completed';
+    console.log("IM AN else : " +post.status);
+  }
+  console.log("NEW STATUS: ", post.status);
+  console.log("Print POST   NEW " + JSON.stringify(post));
+
+  // Update the task status in the database
+  const response = await API.updateStatus(id, post);
+  API.updateTaskStatus(taskId, "completed")
+      .then(() => {
+        // Set task status to "completed" to keep checkbox checked
+        this.task.status = "completed"
+      })
+  
+  console.log("UPDATE RESPONSE: ", response);
+  location.reload();
+},
+
     async submitForm(){
       const formData = new FormData();
       
@@ -198,7 +213,7 @@ computed: {
       console.log("THIS IS CREATE form data : " + formData.values());
       if(this.$refs.form.validate()){
         const response = await API.addTask(formData);
-        this.$router.push({name: 'about', params: {message: response.message}})
+        location.reload();
       }
     },
     async updateForm(id, title, status, content){
@@ -214,7 +229,8 @@ computed: {
         console.log("JSON FORMDATA "  +JSON.stringify(formData));
         const response = await API.updateTask(id, formData);
         console.log("REACHED : " + JSON.stringify(response));
-        this.$router.push({name: 'about', params: {message: response.message}})
+        location.reload();
+
       
       
     },
@@ -223,19 +239,21 @@ computed: {
       console.log(id);
       const response = await API.deleteTask(id);
       console.log("oNCE AGAIN");
+      location.reload();
 
     },
 
   },
   async created() {
-    this.tasks = await API.getAllTaks();
+    this.tasks = await API.getAllTasks();
   },
   watch: {
-  "task.status": {
-    handler: "updateTaskStatus",
-    immediate: false,
-  },
-},
+      "post.status": function (newVal, oldVal) {
+        if (newVal === "completed") {
+          this.$refs.checkbox.$el.querySelector(".v-input--selection-controls__input").checked = true;
+        }
+      },
+    },
 }
 </script>
 
@@ -248,7 +266,7 @@ computed: {
   height: 100vh;
 }
 .background-image {
-  background-image: url('../../public/spacee-740x463.jpg');
+  background-image: url('../../public/GOKU.png');
   background-repeat: no-repeat;
   background-size: cover;
   position: absolute;
@@ -310,11 +328,8 @@ h2 {
   text-align: left !important;
 }
 
-.title,
-.content {
-  display: inline-block;
-  white-space: nowrap;
- 
-  max-width: calc(100% - 48px);
+.v-input--selection-controls.v-input {
+    flex: 0 1 auto;
+    margin-right: 0px;
 }
 </style>
