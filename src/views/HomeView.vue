@@ -54,17 +54,19 @@
  
           <v-row no-gutters class="d-flex justify-center">
       <v-col v-for="task in tasks" :key="task._id" cols="12" md="10" class="p-2">
-        <v-card outlined color="transparent" class="mx-auto" >
-          <v-list-item three-line>
-            <v-checkbox class="pa-6 bg-secondary rounded-circle d-inline-block" v-model="task.status" color="primary"
-              value="1" hide-details  @click="updateTaskStatus(task._id)">
-            </v-checkbox>
+        <v-card outlined color="transparent" class="mx-auto" max-width="500">
+          
+              <v-btn icon v-model="task.status"
+              hide-details  @click="updateTaskStatus(task._id)">
+        <v-icon v-if="task.status == 'completed'" color = 'green'
+>mdi-circle</v-icon>
+      </v-btn>
+            
                 
-                <v-list-item-subtitile>{{ task.title }} {{ task.content }}
-                  <v-menu
-            bottom
-            left
-          >
+               {{ task.title }} {{ task.content }}
+          
+     
+                <v-menu>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 dark
@@ -75,7 +77,7 @@
                 <v-icon>mdi-dots-vertical</v-icon>
               </v-btn>
             </template>
-
+                 
             <v-list>
               <v-list-item-subtitle>
               <v-dialog
@@ -113,9 +115,9 @@
           </v-card>
         </template>
       </v-dialog>
-
-      
-          
+               
+                
+            
           <v-btn
           plain
             color="error"
@@ -128,12 +130,9 @@
 
             </v-list>
           </v-menu>
-                </v-list-item-subtitile>
-                
-                
+  
+        
               
-                </v-list-item>
-            
               
             </v-card>
     
@@ -214,7 +213,7 @@ computed: {
 
   // Update the task status in the database
   const response = await API.updateStatus(id, post);
-  API.updateTaskStatus(taskId, "completed")
+  API.updateStatus(id, "completed")
       .then(() => {
         // Set task status to "completed" to keep checkbox checked
         this.task.status = "completed"
@@ -309,6 +308,9 @@ computed: {
 .content-container {
   display: flex !important;
   flex-direction: column !important;
+  /* flex-wrap: wrap; */
+  /* justify-content:space-around; */
+  /* align-items: stretch; */
   background-color: white;
   padding: 20px;
   margin-top: 120px; /* Adjust margin to your liking */
@@ -360,7 +362,7 @@ h2 {
 }
 .row.no-gutters > .col, .row.no-gutters > [class*=col-] {
     padding: 0;
-    background-color: darkgray;
+   
     
     border-radius: 10px;
     margin-top: 5px;
@@ -374,5 +376,13 @@ h2 {
     
     display: -webkit-box !important;
    
+
+}
+
+.v-btn--icon.v-size--default .v-icon, .v-btn--fab.v-size--default .v-icon {
+    height: 24px;
+    font-size: 24px;
+    width: 24px;
+    color: black;
 }
 </style>
