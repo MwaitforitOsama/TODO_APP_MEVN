@@ -260,8 +260,7 @@ module.exports = class API {
     //Create a ToDo
     static async createTodo(req,res){
         const post= req.body;
-        const imagename = req.file.filename;
-        post.image = imagename;
+       
         try {
              await Post.create(post);
              res.status(201).json({message : "Task Created Succesfully!"});
@@ -299,3 +298,23 @@ module.exports = class API {
 }
 </script>
  
+
+props: {
+  task: {
+    type: Object,
+    required: true,
+  },
+},
+methods: {
+  async updateTaskStatus() {
+    const post = await Post.findById(this.task._id);
+    post.status = this.task.status;
+    await post.save();
+  },
+},
+watch: {
+  "task.status": {
+    handler: "updateTaskStatus",
+    immediate: false,
+  },
+},

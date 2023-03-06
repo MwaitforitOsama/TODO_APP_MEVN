@@ -54,16 +54,29 @@
  
           <v-row no-gutters class="d-flex justify-center">
       <v-col v-for="task in tasks" :key="task._id" cols="12" md="10" class="p-2">
-        <v-card outlined color="transparent" class="mx-auto" max-width="800">
+        <v-card outlined color="transparent" class="mx-auto" >
           <v-list-item three-line>
             <v-checkbox class="pa-6 bg-secondary rounded-circle d-inline-block" v-model="task.status" color="primary"
               value="1" hide-details  @click="updateTaskStatus(task._id)">
             </v-checkbox>
                 
-                <v-list-item-subtitile><span class="content">{{ task.content }} {{ task.title }}</span></v-list-item-subtitile>
-                
-              
-              
+                <v-list-item-subtitile>{{ task.title }} {{ task.content }}
+                  <v-menu
+            bottom
+            left
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                dark
+                icon
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+
+            <v-list>
               <v-list-item-subtitle>
               <v-dialog
         transition="dialog-bottom-transition"
@@ -112,7 +125,14 @@
           >DELETE</v-btn>
         
     </v-list-item-subtitle>
-  </v-list-item>
+
+            </v-list>
+          </v-menu>
+                </v-list-item-subtitile>
+                
+                
+              
+                </v-list-item>
             
               
             </v-card>
@@ -266,7 +286,7 @@ computed: {
   height: 100vh;
 }
 .background-image {
-  background-image: url('../../public/GOKU.png');
+  background-image: url('../../public/bvSra3.jpg');
   background-repeat: no-repeat;
   background-size: cover;
   position: absolute;
@@ -331,5 +351,28 @@ h2 {
 .v-input--selection-controls.v-input {
     flex: 0 1 auto;
     margin-right: 0px;
+}
+
+.v-application .mx-auto {
+    margin-top: 5px !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+.row.no-gutters > .col, .row.no-gutters > [class*=col-] {
+    padding: 0;
+    background-color: darkgray;
+    
+    border-radius: 10px;
+    margin-top: 5px;
+}
+
+.v-application .mx-auto {
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+.v-list-item {
+    
+    display: -webkit-box !important;
+   
 }
 </style>
